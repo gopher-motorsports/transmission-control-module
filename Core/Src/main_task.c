@@ -33,6 +33,7 @@ float rt_avg, tw_avg, rw_ratio;
 int main_task()
 {
 	update_and_queue_param_u32(&tcm_trans_rpm, car_shift_data.current_RPM);
+	update_and_queue_param_u32(&tcm_trans_rpm, car_shift_data.target_RPM);
 	tcm_trans_rpm.data = car_shift_data.current_RPM;
 	tcm_throttle_blip.data = car_shift_data.throttle_blip;
 	tcm_using_clutch.data = car_shift_data.using_clutch;
