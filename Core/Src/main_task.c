@@ -32,11 +32,6 @@ float rt_avg, tw_avg, rw_ratio;
 // DO NOT DELETE
 int main_task()
 {
-	update_and_queue_param_u32(&tcm_trans_rpm, car_shift_data.current_RPM);
-	tcm_trans_rpm.data = car_shift_data.current_RPM;
-	tcm_throttle_blip.data = car_shift_data.throttle_blip;
-	tcm_using_clutch.data = car_shift_data.using_clutch;
-	tcm_anti_stall.data = car_shift_data.anti_stall;
 	update_and_queue_param_u8(&sw_upshift, car_buttons.upshift_button);
 	update_and_queue_param_u8(&sw_downshift, car_buttons.downshift_button);
 	update_and_queue_param_u8(&sw_clutch_fast, car_buttons.clutch_fast_button);
@@ -45,16 +40,15 @@ int main_task()
 	update_and_queue_param_u8(&sw_aero_rear, car_buttons.aero_rear_button);
 	update_and_queue_param_u8(&tcm_neutral, (uint8_t)read_neutral_sensor_pin());
 
-	//sw_clutch.data = car_buttons.clutch_button;
-	//sw_drs.data = car_buttons.aux1_button;
-	//sw_aux2.data = car_buttons.aux2_button;
-	//sw_aux3.data = car_buttons.aux3_button;
-	tcm_target_rpm.data = car_shift_data.target_RPM;
-	tcm_current_gear.data = car_shift_data.current_gear;
-	tcm_target_gear.data = car_shift_data.target_gear;
-	tcm_currently_moving.data = car_shift_data.currently_moving;
-	tcm_successful_shift.data = car_shift_data.successful_shift;
-
+	update_and_queue_param_u32(&tcm_target_rpm, car_shift_data.target_RPM);
+	update_and_queue_param_u8(&tcm_current_gear, car_shift_data.current_gear);
+	update_and_queue_param_u8(&tcm_target_gear, car_shift_data.target_gear);
+	update_and_queue_param_u8(&tcm_currently_moving, car_shift_data.currently_moving);
+	update_and_queue_param_u8(&tcm_successful_shift, car_shift_data.successful_shift);
+	update_and_queue_param_u32(&tcm_trans_rpm, car_shift_data.trans_speed);
+	update_and_queue_param_u8(&tcm_throttle_blip, car_shift_data.throttle_blip);
+	update_and_queue_param_u8(&tcm_using_clutch, car_shift_data.using_clutch);
+	update_and_queue_param_u8(&tcm_anti_stall, car_shift_data.anti_stall);
 
 	// Update shift struct with relevant data
 	update_car_shift_struct();
