@@ -82,7 +82,15 @@ void set_clutch_solenoid(solenoid_position_t position)
 	// If we are trying to close clutch and the last clutch button press was slow then enable slow drop
 	if (position == SOLENOID_OFF && using_slow_drop)
 	{
-		set_slow_drop(true);
+		// when slow dropping, we want to start by fast dropping until the bite point
+		if (get_clutch_pot_pos() < CLUTCH_OPEN_POS_MM - CLUTCH_SLOW_DROP_FAST_TO_SLOW_EXTRA_MM)
+		{
+			set_slow_drop(false);
+		}
+		else
+		{
+			set_slow_drop(true);
+		}
 		pending_return_to_fast_drop = true;
 		begin_tick_return_to_fast = HAL_GetTick();
 	}
