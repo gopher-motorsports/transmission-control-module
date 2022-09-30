@@ -175,7 +175,8 @@ void run_upshift_sm()
 	case ST_U_EXIT_GEAR:
 		// Reach target RPM ensures that our target gear is not neutral and that clutch isn't used
 		reach_target_RPM_spark_cut();
-		if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
+		//if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
+		if (0)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_exit_gear_tick > UPSHIFT_EXIT_TIMEOUT_MS - 10))
 			{
@@ -217,7 +218,8 @@ void run_upshift_sm()
 			car_logs.F_U_EXIT_NO_CLUTCH_AND_SPARK_RETURN++;
 			car_Upshift_State = ST_U_EXIT_GEAR;
 		}
-		if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
+		//if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
+		if (0)
 		{
 			// If spark return successfully releases then continue
 			spark_cut(true);
@@ -228,7 +230,8 @@ void run_upshift_sm()
 
 	case ST_U_ENTER_GEAR:
 		reach_target_RPM_spark_cut();
-		if (get_shift_pot_pos() > UPSHIFT_ENTER_POS_MM)
+		//if (get_shift_pot_pos() > UPSHIFT_ENTER_POS_MM)
+		if (0)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_enter_gear_tick > UPSHIFT_ENTER_TIMEOUT_MS - 10))
 			{
@@ -301,8 +304,8 @@ void run_downshift_sm()
 		break;
 
 	case ST_D_LOAD_SHIFT_LVR:
-		if (	(HAL_GetTick() - begin_shift_tick > SHIFT_LEVER_PRELOAD_TIME_MS) &&
-				(get_clutch_pot_pos() < CLUTCH_OPEN_POS_MM) )
+		if (	(HAL_GetTick() - begin_shift_tick > SHIFT_LEVER_PRELOAD_TIME_MS) )//&&
+				//(get_clutch_pot_pos() < CLUTCH_OPEN_POS_MM) )
 		{
 			throttle_blip(true);
 			begin_exit_gear_tick = HAL_GetTick();
@@ -321,7 +324,8 @@ void run_downshift_sm()
 		break;
 
 	case ST_D_EXIT_GEAR:
-		if (get_shift_pot_pos() < DOWNSHIFT_EXIT_POS_MM)
+		//if (get_shift_pot_pos() < DOWNSHIFT_EXIT_POS_MM)
+		if (0)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_exit_gear_tick > DOWNSHIFT_EXIT_TIMEOUT_MS - 10))
 			{
@@ -342,7 +346,8 @@ void run_downshift_sm()
 
 	case ST_D_ENTER_GEAR:
 		reach_target_RPM_spark_cut();
-		if (get_shift_pot_pos() < DOWNSHIFT_ENTER_POS_MM)
+		//if (get_shift_pot_pos() < DOWNSHIFT_ENTER_POS_MM)
+		if (0)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_enter_gear_tick > DOWNSHIFT_ENTER_TIMEOUT_MS - 10))
 			{
