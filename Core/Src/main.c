@@ -595,6 +595,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : LAP_TIM_8_Pin LAP_TIM_9_Pin */
+  GPIO_InitStruct.Pin = LAP_TIM_8_Pin|LAP_TIM_9_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /*Configure GPIO pin : CLUTCH_SLOW_DROP_Pin */
   GPIO_InitStruct.Pin = CLUTCH_SLOW_DROP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;

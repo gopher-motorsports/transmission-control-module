@@ -50,6 +50,9 @@ int main_task()
 	update_and_queue_param_u8(&tcm_using_clutch, car_shift_data.using_clutch);
 	update_and_queue_param_u8(&tcm_anti_stall, car_shift_data.anti_stall);
 
+	// check for the lap timer signal
+	update_and_queue_param_u8(&tcm_lap_timer, !HAL_GPIO_ReadPin(LAP_TIM_9_GPIO_Port, LAP_TIM_9_Pin));
+
 	// Update shift struct with relevant data
 	update_car_shift_struct();
 
@@ -211,7 +214,7 @@ void run_upshift_sm()
 		if (HAL_GetTick() - begin_exit_gear_tick > SPARK_RETURN_MS)
 		{
 			// Spark Return didn't release gear. Start using clutch
-			spark_cut(true);
+			spark_cut(false);
 			set_clutch_solenoid(SOLENOID_ON);
 			begin_exit_gear_tick = HAL_GetTick();
 			car_shift_data.using_clutch = true;
