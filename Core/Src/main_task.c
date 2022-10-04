@@ -178,8 +178,8 @@ void run_upshift_sm()
 	case ST_U_EXIT_GEAR:
 		// Reach target RPM ensures that our target gear is not neutral and that clutch isn't used
 		reach_target_RPM_spark_cut();
-		//if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
-		if (0)
+#if (!TIME_BASED_SHIFTING_ONLY)
+		if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_exit_gear_tick > UPSHIFT_EXIT_TIMEOUT_MS - 10))
 			{
@@ -188,6 +188,7 @@ void run_upshift_sm()
 			car_Upshift_State = ST_U_ENTER_GEAR;
 			begin_enter_gear_tick = HAL_GetTick();
 		}
+#endif
 		if (HAL_GetTick() - begin_exit_gear_tick > UPSHIFT_EXIT_TIMEOUT_MS)
 		{
 			if (!car_shift_data.using_clutch)
@@ -221,20 +222,21 @@ void run_upshift_sm()
 			car_logs.F_U_EXIT_NO_CLUTCH_AND_SPARK_RETURN++;
 			car_Upshift_State = ST_U_EXIT_GEAR;
 		}
-		//if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
-		if (0)
+#if (!TIME_BASED_SHIFTING_ONLY)
+		if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
 		{
 			// If spark return successfully releases then continue
 			spark_cut(true);
 			car_Upshift_State = ST_U_ENTER_GEAR;
 			begin_enter_gear_tick = HAL_GetTick();
 		}
+#endif
 		break;
 
 	case ST_U_ENTER_GEAR:
 		reach_target_RPM_spark_cut();
-		//if (get_shift_pot_pos() > UPSHIFT_ENTER_POS_MM)
-		if (0)
+#if (!TIME_BASED_SHIFTING_ONLY)
+		if (get_shift_pot_pos() > UPSHIFT_ENTER_POS_MM)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_enter_gear_tick > UPSHIFT_ENTER_TIMEOUT_MS - 10))
 			{
@@ -242,6 +244,7 @@ void run_upshift_sm()
 			}
 			car_Upshift_State = ST_U_FINISH_SHIFT;
 		}
+#endif
 		if (HAL_GetTick() - begin_enter_gear_tick > UPSHIFT_ENTER_TIMEOUT_MS)
 		{
 			if (car_shift_data.using_clutch)
@@ -327,8 +330,8 @@ void run_downshift_sm()
 		break;
 
 	case ST_D_EXIT_GEAR:
-		//if (get_shift_pot_pos() < DOWNSHIFT_EXIT_POS_MM)
-		if (0)
+#if (!TIME_BASED_SHIFTING_ONLY)
+		if (get_shift_pot_pos() < DOWNSHIFT_EXIT_POS_MM)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_exit_gear_tick > DOWNSHIFT_EXIT_TIMEOUT_MS - 10))
 			{
@@ -337,6 +340,7 @@ void run_downshift_sm()
 			car_Downshift_State = ST_D_ENTER_GEAR;
 			begin_enter_gear_tick = HAL_GetTick();
 		}
+#endif
 		if (HAL_GetTick() - begin_exit_gear_tick > DOWNSHIFT_EXIT_TIMEOUT_MS)
 		{
 			// FAILED with clutch. Stop shift
@@ -349,8 +353,8 @@ void run_downshift_sm()
 
 	case ST_D_ENTER_GEAR:
 		reach_target_RPM_spark_cut();
-		//if (get_shift_pot_pos() < DOWNSHIFT_ENTER_POS_MM)
-		if (0)
+#if (!TIME_BASED_SHIFTING_ONLY)
+		if (get_shift_pot_pos() < DOWNSHIFT_ENTER_POS_MM)
 		{
 			if (car_shift_data.clutch_override && !(HAL_GetTick() - begin_enter_gear_tick > DOWNSHIFT_ENTER_TIMEOUT_MS - 10))
 			{
@@ -358,6 +362,7 @@ void run_downshift_sm()
 			}
 			car_Downshift_State = ST_D_FINISH_SHIFT;
 		}
+#endif
 		if (HAL_GetTick() - begin_enter_gear_tick > DOWNSHIFT_ENTER_TIMEOUT_MS)
 		{
 			car_logs.FS_Total++;
