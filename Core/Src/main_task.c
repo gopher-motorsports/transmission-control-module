@@ -215,7 +215,7 @@ void run_upshift_sm()
 		if (HAL_GetTick() - begin_exit_gear_tick > SPARK_RETURN_MS)
 		{
 			// Spark Return didn't release gear. Start using clutch
-			spark_cut(false);
+			spark_cut(true);
 			set_clutch_solenoid(SOLENOID_ON);
 			begin_exit_gear_tick = HAL_GetTick();
 			car_shift_data.using_clutch = true;
@@ -310,8 +310,7 @@ void run_downshift_sm()
 		break;
 
 	case ST_D_LOAD_SHIFT_LVR:
-		if (	(HAL_GetTick() - begin_shift_tick > SHIFT_LEVER_PRELOAD_TIME_MS) )//&&
-				//(get_clutch_pot_pos() < CLUTCH_OPEN_POS_MM) )
+		if ((HAL_GetTick() - begin_shift_tick > SHIFT_LEVER_PRELOAD_TIME_MS))
 		{
 			throttle_blip(true);
 			begin_exit_gear_tick = HAL_GetTick();
