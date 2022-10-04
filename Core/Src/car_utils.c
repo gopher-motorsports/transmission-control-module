@@ -82,7 +82,15 @@ void set_clutch_solenoid(solenoid_position_t position)
 	// If we are trying to close clutch and the last clutch button press was slow then enable slow drop
 	if (position == SOLENOID_OFF && using_slow_drop)
 	{
-		set_slow_drop(true);
+		// when slow dropping, we want to start by fast dropping until the bite point
+		if (get_clutch_pot_pos() < CLUTCH_OPEN_POS_MM - CLUTCH_SLOW_DROP_FAST_TO_SLOW_EXTRA_MM)
+		{
+			set_slow_drop(false);
+		}
+		else
+		{
+			set_slow_drop(true);
+		}
 		pending_return_to_fast_drop = true;
 		begin_tick_return_to_fast = HAL_GetTick();
 	}
@@ -184,7 +192,8 @@ float rpm_arr[100];
 float wheel_arr[100];
 uint32_t rpm_idx = 0, wheel_idx = 0;
 // Get current gear
-float gear_ratios[5] = {270.0f, 215.0f, 185.0f, 165.0f, 150.0f};
+//float gear_ratios[5] = {270.0f, 215.0f, 185.0f, 165.0f, 150.0f};
+float gear_ratios[5] = {141.7f, 112.9f, 97.1f, 86.6f, 78.7f};
 float tolerance = 0.05f;
 
 float rw_ratio_avg;
