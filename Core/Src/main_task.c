@@ -7,16 +7,17 @@
 #include "global_vars.h"
 #include "main_task.h"
 #include "DAM.h"
+#include "acm.h"
 //#include "car_utils.h"
 
 extern CAN_HandleTypeDef hcan1;
-extern CAN_HandleTypeDef hcan2;
 
 extern bool using_slow_drop;
 
 int init_main_task()
 {
 	init_can(&hcan1, TCM_ID, BXTYPE_MASTER);
+	acm_init();
 
 	return 0;
 }
@@ -52,6 +53,9 @@ int main_task()
 
 	// check for the lap timer signal
 	update_and_queue_param_u8(&tcm_lap_timer, !HAL_GPIO_ReadPin(LAP_TIM_9_GPIO_Port, LAP_TIM_9_Pin));
+
+	// acm go brrrrr
+	run_acm();
 
 	// Update shift struct with relevant data
 	update_car_shift_struct();
