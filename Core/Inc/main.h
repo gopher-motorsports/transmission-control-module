@@ -90,6 +90,10 @@ void Error_Handler(void);
 #define ECU_THROTTLE_BLIP_GPIO_Port GPIOD
 #define ECU_CLUTCH_POS_Pin GPIO_PIN_7
 #define ECU_CLUTCH_POS_GPIO_Port GPIOC
+#define LAP_TIM_8_Pin GPIO_PIN_8
+#define LAP_TIM_8_GPIO_Port GPIOC
+#define LAP_TIM_9_Pin GPIO_PIN_9
+#define LAP_TIM_9_GPIO_Port GPIOC
 #define HEARTBEAT_Pin GPIO_PIN_10
 #define HEARTBEAT_GPIO_Port GPIOC
 #define DAM_LED_Pin GPIO_PIN_11
