@@ -270,7 +270,7 @@ void run_upshift_sm()
 
 	case ST_U_FINISH_SHIFT:
 		// set_clutch verifies that clutch button not depressed
-		if (HAL_GetTick() - begin_enter_gear_tick > SHIFTING_TIMEOUT_MS) {
+		if (HAL_GetTick() - shifting_timeout_timer > SHIFTING_TIMEOUT_MS) {
 			set_clutch_solenoid(SOLENOID_OFF);
 			set_upshift_solenoid(SOLENOID_OFF);
 			set_downshift_solenoid(SOLENOID_OFF);
@@ -381,7 +381,7 @@ void run_downshift_sm()
 		break;
 
 	case ST_D_FINISH_SHIFT:
-		if (HAL_GetTick() - begin_enter_gear_tick > SHIFTING_TIMEOUT_MS) {
+		if (HAL_GetTick() - shifting_timeout_timer > SHIFTING_TIMEOUT_MS) {
 			// set_clutch verifies that clutch button not depressed
 			set_clutch_solenoid(car_shift_data.failed_enter_gear ? SOLENOID_ON : SOLENOID_OFF);
 			set_downshift_solenoid(SOLENOID_OFF);
