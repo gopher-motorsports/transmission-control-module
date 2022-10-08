@@ -153,13 +153,16 @@ void run_upshift_sm()
 	static uint32_t begin_shift_tick;
 	static uint32_t begin_exit_gear_tick;
 	static uint32_t begin_enter_gear_tick;
+	static uint32_t shifting_timeout_timer;
+
 	switch (car_Upshift_State)
 	{
 	case ST_U_BEGIN_SHIFT:
-		begin_shift_tick = HAL_GetTick();
+		begin_shift_tick = HAL_GetTick(); // Log that first begin shift tick
+		shifting_timeout_timer = HAL_GetTick(); // Begin timer for making sure we shift for a minimum amount of time
 		set_upshift_solenoid(SOLENOID_ON);
 		car_logs.TOTAL_SHIFTS++;
-		car_shift_data.using_clutch = (car_buttons.clutch_fast_button || car_buttons.clutch_slow_button);
+		car_shift_data.using_clutch = (car_buttons.clutch_fast_button || car_buttons.clutch_slow_button); // Evaluating booleans from system inputs
 		car_shift_data.clutch_override = (car_buttons.clutch_fast_button || car_buttons.clutch_slow_button);
 		car_shift_data.failed_enter_gear = false;
 		car_shift_data.successful_shift = true;
@@ -185,7 +188,7 @@ void run_upshift_sm()
 			{
 				break;
 			}
-			car_Upshift_State = ST_U_ENTER_GEAR;
+			car_Upshift_State = ST_U_ENTER_GEAR; // If everything is successful, begin next phase - enter gear
 			begin_enter_gear_tick = HAL_GetTick();
 		}
 #endif
@@ -267,21 +270,23 @@ void run_upshift_sm()
 
 	case ST_U_FINISH_SHIFT:
 		// set_clutch verifies that clutch button not depressed
-		set_clutch_solenoid(SOLENOID_OFF);
-		set_upshift_solenoid(SOLENOID_OFF);
-		set_downshift_solenoid(SOLENOID_OFF);
-		spark_cut(false);
-		car_shift_data.using_clutch = false;
-		if (car_shift_data.successful_shift)
-		{
-			car_shift_data.current_gear = car_shift_data.target_gear;
+		if (HAL_GetTick() - shifting_timeout_timer > SHIFTING_TIMEOUT_MS) {
+			set_clutch_solenoid(SOLENOID_OFF);
+			set_upshift_solenoid(SOLENOID_OFF);
+			set_downshift_solenoid(SOLENOID_OFF);
+			spark_cut(false);
+			car_shift_data.using_clutch = false;
+			if (car_shift_data.successful_shift)
+			{
+				car_shift_data.current_gear = car_shift_data.target_gear;
+			}
+			else
+			{
+				car_shift_data.current_gear = ERROR_GEAR;
+				car_shift_data.gear_established = false;
+			}
+			car_Main_State = ST_IDLE;
 		}
-		else
-		{
-			car_shift_data.current_gear = ERROR_GEAR;
-			car_shift_data.gear_established = false;
-		}
-		car_Main_State = ST_IDLE;
 		break;
 	}
 }
@@ -294,10 +299,13 @@ void run_downshift_sm()
 	static uint32_t begin_exit_gear_tick;
 	static uint32_t begin_enter_gear_tick;
 	static uint32_t begin_hold_clutch_tick;
+	static uint32_t shifting_timeout_timer;
+
 	switch (car_Downshift_State)
 	{
 	case ST_D_BEGIN_SHIFT:
 		begin_shift_tick = HAL_GetTick();
+		shifting_timeout_timer = HAL_GetTick();
 		set_downshift_solenoid(SOLENOID_ON);
 		set_clutch_solenoid(SOLENOID_ON);
 		car_logs.TOTAL_SHIFTS++;
@@ -373,22 +381,24 @@ void run_downshift_sm()
 		break;
 
 	case ST_D_FINISH_SHIFT:
-		// set_clutch verifies that clutch button not depressed
-		set_clutch_solenoid(car_shift_data.failed_enter_gear ? SOLENOID_ON : SOLENOID_OFF);
-		set_downshift_solenoid(SOLENOID_OFF);
-		set_upshift_solenoid(SOLENOID_OFF);
-		throttle_blip(false);
-		car_shift_data.using_clutch = false;
-		begin_hold_clutch_tick = HAL_GetTick();
-		if (car_shift_data.failed_enter_gear)
-		{
-			car_shift_data.current_gear = ERROR_GEAR;
-			car_shift_data.gear_established = false;
-			car_Downshift_State = ST_D_HOLD_CLUTCH;
-		}
-		else
-		{
-			car_Main_State = ST_IDLE;
+		if (HAL_GetTick() - shifting_timeout_timer > SHIFTING_TIMEOUT_MS) {
+			// set_clutch verifies that clutch button not depressed
+			set_clutch_solenoid(car_shift_data.failed_enter_gear ? SOLENOID_ON : SOLENOID_OFF);
+			set_downshift_solenoid(SOLENOID_OFF);
+			set_upshift_solenoid(SOLENOID_OFF);
+			throttle_blip(false);
+			car_shift_data.using_clutch = false;
+			begin_hold_clutch_tick = HAL_GetTick();
+			if (car_shift_data.failed_enter_gear)
+			{
+				car_shift_data.current_gear = ERROR_GEAR;
+				car_shift_data.gear_established = false;
+				car_Downshift_State = ST_D_HOLD_CLUTCH;
+			}
+			else
+			{
+				car_Main_State = ST_IDLE;
+			}
 		}
 		break;
 
