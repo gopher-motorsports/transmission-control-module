@@ -188,13 +188,13 @@ uint32_t read_neutral_sensor_pin()
 
 
 /* GEARS */
-float rpm_arr[100];
-float wheel_arr[100];
+float rpm_arr[250];
+float wheel_arr[250];
 uint32_t rpm_idx = 0, wheel_idx = 0;
 // Get current gear
 //float gear_ratios[5] = {270.0f, 215.0f, 185.0f, 165.0f, 150.0f};
 float gear_ratios[5] = {141.7f, 112.9f, 97.1f, 86.6f, 78.7f};
-float tolerance = 0.05f;
+float tolerance = 0.07f;
 
 float rw_ratio_avg;
 float theoretical_rpm_arr[5];

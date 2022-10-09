@@ -159,7 +159,6 @@ void run_upshift_sm()
 	{
 	case ST_U_BEGIN_SHIFT:
 		begin_shift_tick = HAL_GetTick(); // Log that first begin shift tick
-		shifting_timeout_timer = HAL_GetTick(); // Begin timer for making sure we shift for a minimum amount of time
 		set_upshift_solenoid(SOLENOID_ON);
 		car_logs.TOTAL_SHIFTS++;
 		car_shift_data.using_clutch = (car_buttons.clutch_fast_button || car_buttons.clutch_slow_button); // Evaluating booleans from system inputs
@@ -172,6 +171,7 @@ void run_upshift_sm()
 	case ST_U_LOAD_SHIFT_LVR:
 		if (HAL_GetTick() - begin_shift_tick > SHIFT_LEVER_PRELOAD_TIME_MS)
 		{
+			shifting_timeout_timer = HAL_GetTick(); // Begin timer for making sure we shift for a minimum amount of time
 			spark_cut(true);
 			begin_exit_gear_tick = HAL_GetTick();
 			car_Upshift_State = ST_U_EXIT_GEAR;
@@ -180,7 +180,7 @@ void run_upshift_sm()
 
 	case ST_U_EXIT_GEAR:
 		// Reach target RPM ensures that our target gear is not neutral and that clutch isn't used
-		reach_target_RPM_spark_cut();
+		//reach_target_RPM_spark_cut();
 #if (!TIME_BASED_SHIFTING_ONLY)
 		if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
 		{
@@ -198,9 +198,9 @@ void run_upshift_sm()
 			{
 				// Try returning spark for 10ms
 				begin_exit_gear_tick = HAL_GetTick();
-				spark_cut(false);
+				//spark_cut(false);
 				car_logs.F_U_EXIT_NO_CLUTCH++;
-				car_Upshift_State = ST_U_SPARK_RETURN;
+				car_Upshift_State = ST_U_FINISH_SHIFT;
 
 			}
 			else
@@ -214,30 +214,30 @@ void run_upshift_sm()
 		}
 		break;
 
-	case ST_U_SPARK_RETURN:
-		if (HAL_GetTick() - begin_exit_gear_tick > SPARK_RETURN_MS)
-		{
-			// Spark Return didn't release gear. Start using clutch
-			spark_cut(true);
-			set_clutch_solenoid(SOLENOID_ON);
-			begin_exit_gear_tick = HAL_GetTick();
-			car_shift_data.using_clutch = true;
-			car_logs.F_U_EXIT_NO_CLUTCH_AND_SPARK_RETURN++;
-			car_Upshift_State = ST_U_EXIT_GEAR;
-		}
-#if (!TIME_BASED_SHIFTING_ONLY)
-		if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
-		{
-			// If spark return successfully releases then continue
-			spark_cut(true);
-			car_Upshift_State = ST_U_ENTER_GEAR;
-			begin_enter_gear_tick = HAL_GetTick();
-		}
-#endif
-		break;
+//	case ST_U_SPARK_RETURN:
+//		if (HAL_GetTick() - begin_exit_gear_tick > SPARK_RETURN_MS)
+//		{
+//			// Spark Return didn't release gear. Start using clutch
+//			spark_cut(true);
+//			set_clutch_solenoid(SOLENOID_ON);
+//			begin_exit_gear_tick = HAL_GetTick();
+//			car_shift_data.using_clutch = true;
+//			car_logs.F_U_EXIT_NO_CLUTCH_AND_SPARK_RETURN++;
+//			car_Upshift_State = ST_U_EXIT_GEAR;
+//		}
+//#if (!TIME_BASED_SHIFTING_ONLY)
+//		if (get_shift_pot_pos() > UPSHIFT_EXIT_POS_MM)
+//		{
+//			// If spark return successfully releases then continue
+//			spark_cut(true);
+//			car_Upshift_State = ST_U_ENTER_GEAR;
+//			begin_enter_gear_tick = HAL_GetTick();
+//		}
+//#endif
+//		break;
 
 	case ST_U_ENTER_GEAR:
-		reach_target_RPM_spark_cut();
+		//reach_target_RPM_spark_cut();
 #if (!TIME_BASED_SHIFTING_ONLY)
 		if (get_shift_pot_pos() > UPSHIFT_ENTER_POS_MM)
 		{
@@ -270,7 +270,8 @@ void run_upshift_sm()
 
 	case ST_U_FINISH_SHIFT:
 		// set_clutch verifies that clutch button not depressed
-		if (HAL_GetTick() - shifting_timeout_timer > SHIFTING_TIMEOUT_MS) {
+		if (HAL_GetTick() - shifting_timeout_timer > UPSHIFT_MIN_TIME)
+		{
 			set_clutch_solenoid(SOLENOID_OFF);
 			set_upshift_solenoid(SOLENOID_OFF);
 			set_downshift_solenoid(SOLENOID_OFF);
@@ -305,7 +306,6 @@ void run_downshift_sm()
 	{
 	case ST_D_BEGIN_SHIFT:
 		begin_shift_tick = HAL_GetTick();
-		shifting_timeout_timer = HAL_GetTick();
 		set_downshift_solenoid(SOLENOID_ON);
 		set_clutch_solenoid(SOLENOID_ON);
 		car_logs.TOTAL_SHIFTS++;
@@ -320,6 +320,7 @@ void run_downshift_sm()
 	case ST_D_LOAD_SHIFT_LVR:
 		if ((HAL_GetTick() - begin_shift_tick > SHIFT_LEVER_PRELOAD_TIME_MS))
 		{
+			shifting_timeout_timer = HAL_GetTick();
 			throttle_blip(true);
 			begin_exit_gear_tick = HAL_GetTick();
 			car_Downshift_State = ST_D_EXIT_GEAR;
@@ -381,7 +382,8 @@ void run_downshift_sm()
 		break;
 
 	case ST_D_FINISH_SHIFT:
-		if (HAL_GetTick() - shifting_timeout_timer > SHIFTING_TIMEOUT_MS) {
+		if (HAL_GetTick() - shifting_timeout_timer > DOWNSHIFT_MIN_TIME)
+		{
 			// set_clutch verifies that clutch button not depressed
 			set_clutch_solenoid(car_shift_data.failed_enter_gear ? SOLENOID_ON : SOLENOID_OFF);
 			set_downshift_solenoid(SOLENOID_OFF);
