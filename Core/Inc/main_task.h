@@ -74,6 +74,7 @@ void run_downshift_sm();
 
 #define HEARTBEAT_LED_TIME_ms 500
 #define DISPLAY_UPDATE_TIME_ms 100
+#define GEAR_UPDATE_TIME_ms 25
 
 
 #endif /* INC_MAIN_TASK_H_ */

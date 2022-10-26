@@ -8,14 +8,11 @@
 #include "DAM.h"
 #include "acm.h"
 #include "car_utils.h"
+#include "shift_parameters.h"
 
 extern CAN_HandleTypeDef hcan1;
 
 logs_t car_logs = { 0 };
-
-Main_States_t car_Main_State = ST_IDLE;
-Upshift_States_t car_Upshift_State;
-Downshift_States_t car_Downshift_State;
 
 int init_main_task()
 {
@@ -27,8 +24,12 @@ int init_main_task()
 
 int main_task()
 {
+	static Main_States_t car_Main_State = ST_IDLE;
+	static Upshift_States_t car_Upshift_State;
+	static Downshift_States_t car_Downshift_State;
+
 	// Heartbeat LED
-	static uint32_t last_heartbeat;
+	static uint32_t last_heartbeat = 0;
 	if (HAL_GetTick() - last_heartbeat >= HEARTBEAT_LED_TIME_ms)
 	{
 		last_heartbeat = HAL_GetTick();
@@ -66,14 +67,21 @@ int main_task()
 	// gear calculation handling
 	update_wheel_arr();
 	update_rpm_arr();
-	car_shift_data.current_gear = get_current_gear();
+
+	// only check the gear every 25ms
+	static uint32_t last_gear_update = 0;
+	if (HAL_GetTick() - last_gear_update >= GEAR_UPDATE_TIME_ms)
+	{
+		last_gear_update = HAL_GetTick();
+		car_shift_data.current_gear = get_current_gear();
+	}
 
 	// Anti Stall
 	//anti_stall(); // disabling anti-stall for now (mike says we dont really need it)
 
 	// Update Display
-	static uint32_t last_display_update;
-	if (HAL_GetTick() - last_display_update > DISPLAY_UPDATE_TIME_ms)
+	static uint32_t last_display_update = 0;
+	if (HAL_GetTick() - last_display_update >= DISPLAY_UPDATE_TIME_ms)
 	{
 		last_display_update = HAL_GetTick();
 		send_display_data();
@@ -189,6 +197,7 @@ void run_upshift_sm()
 		break;
 
 //	case ST_U_SPARK_RETURN:
+		// TODO put this back in
 //		if (HAL_GetTick() - begin_exit_gear_tick > SPARK_RETURN_MS)
 //		{
 //			// Spark Return didn't release gear. Start using clutch
