@@ -4,15 +4,18 @@
  *  Created on: Apr 24, 2022
  *      Author: sebas
  */
-#include "global_vars.h"
 #include "main_task.h"
 #include "DAM.h"
 #include "acm.h"
-//#include "car_utils.h"
+#include "car_utils.h"
 
 extern CAN_HandleTypeDef hcan1;
 
-extern bool using_slow_drop;
+logs_t car_logs = { 0 };
+
+Main_States_t car_Main_State = ST_IDLE;
+Upshift_States_t car_Upshift_State;
+Downshift_States_t car_Downshift_State;
 
 int init_main_task()
 {
@@ -22,17 +25,17 @@ int init_main_task()
 	return 0;
 }
 
-// TEMP DELETE
-float trans_wheel_ratio, RPM_trans_ratio, temp_ws, temp_ts;
-float trans_wheel_ratio_arr[5000];
-uint32_t tw_arr_idx = 0;
-float RPM_trans_ratio_arr[5000];
-uint32_t rt_arr_idx = 0;
-float rt_avg, tw_avg, rw_ratio;
-
-// DO NOT DELETE
 int main_task()
 {
+	// Heartbeat LED
+	static uint32_t last_heartbeat;
+	if (HAL_GetTick() - last_heartbeat >= HEARTBEAT_LED_TIME_ms)
+	{
+		last_heartbeat = HAL_GetTick();
+		HAL_GPIO_TogglePin(HEARTBEAT_GPIO_Port, HEARTBEAT_Pin);
+	}
+
+	// update all the internal values for logging
 	update_and_queue_param_u8(&sw_upshift, car_buttons.upshift_button);
 	update_and_queue_param_u8(&sw_downshift, car_buttons.downshift_button);
 	update_and_queue_param_u8(&sw_clutch_fast, car_buttons.clutch_fast_button);
@@ -40,7 +43,6 @@ int main_task()
 	update_and_queue_param_u8(&sw_aero_front, car_buttons.aero_front_button);
 	update_and_queue_param_u8(&sw_aero_rear, car_buttons.aero_rear_button);
 	update_and_queue_param_u8(&tcm_neutral, (uint8_t)read_neutral_sensor_pin());
-
 	update_and_queue_param_u32(&tcm_target_rpm, car_shift_data.target_RPM);
 	update_and_queue_param_u8(&tcm_current_gear, car_shift_data.current_gear);
 	update_and_queue_param_u8(&tcm_target_gear, car_shift_data.target_gear);
@@ -57,46 +59,40 @@ int main_task()
 	// acm go brrrrr
 	run_acm();
 
-	// Update shift struct with relevant data
+	// Update shift struct with relevant data. This is to latch all of the
+	// important data for this go around the state machine
 	update_car_shift_struct();
 
-	// Validate that if we are blipping that the clutch is open
-	validate_throttle_blip();
-
-	// Heartbeat LED
-	static uint32_t last_heartbeat;
-	if (HAL_GetTick() - last_heartbeat > 500)
-	{
-		last_heartbeat = HAL_GetTick();
-		HAL_GPIO_TogglePin(HEARTBEAT_GPIO_Port, HEARTBEAT_Pin);
-	}
+	// gear calculation handling
+	update_wheel_arr();
+	update_rpm_arr();
+	car_shift_data.current_gear = get_current_gear();
 
 	// Anti Stall
-	anti_stall();
+	//anti_stall(); // disabling anti-stall for now (mike says we dont really need it)
 
 	// Update Display
 	static uint32_t last_display_update;
-	if (HAL_GetTick() - last_display_update > 100)
+	if (HAL_GetTick() - last_display_update > DISPLAY_UPDATE_TIME_ms)
 	{
 		last_display_update = HAL_GetTick();
 		send_display_data();
 	}
 
-
-	// Open clutch if requested by driver always and close clutch if button not pressed and IDLE
+	// handle the clutch based on the state of the car and the buttons
 	clutch_task();
 
+	// TODO where to start fixing code
 	switch (car_Main_State)
 	{
 	case ST_IDLE:
-		set_all_solenoids(SOLENOID_OFF);
+		set_shift_solenoids(SOLENOID_OFF);
 		spark_cut(false);
 		if (car_buttons.pending_upshift)
 		{
 			car_buttons.pending_upshift = 0;
 			if (calc_validate_upshift())
 			{
-				using_slow_drop = car_buttons.clutch_slow_button;
 				car_Main_State = ST_HDL_UPSHIFT;
 				car_Upshift_State = ST_U_BEGIN_SHIFT;
 			}
@@ -107,7 +103,6 @@ int main_task()
 			car_buttons.pending_downshift = 0;
 			if (calc_validate_downshift())
 			{
-				using_slow_drop = car_buttons.clutch_slow_button;
 				car_Main_State = ST_HDL_DOWNSHIFT;
 				car_Downshift_State = ST_D_BEGIN_SHIFT;
 			}
@@ -123,31 +118,6 @@ int main_task()
 		run_downshift_sm();
 		break;
 	}
-
-	trans_wheel_ratio = current_trans_wheel_ratio();
-	RPM_trans_ratio = current_RPM_trans_ratio();
-	temp_ts = get_trans_speed();
-	temp_ws = get_wheel_speed();
-	trans_wheel_ratio_arr[tw_arr_idx++] = trans_wheel_ratio;
-	RPM_trans_ratio_arr[rt_arr_idx++] = RPM_trans_ratio;
-	if (tw_arr_idx == 5000)
-	{
-		float tw_sum = 0.0f, rt_sum = 0.0f;
-		for (int i = 0; i < 5000; i++)
-		{
-			tw_sum += trans_wheel_ratio_arr[i];
-			rt_sum += RPM_trans_ratio_arr[i];
-		}
-		tw_avg = tw_sum/5000;
-		rt_avg = rt_sum/5000;
-
-
-	}
-	tw_arr_idx = tw_arr_idx % 5000;
-	rt_arr_idx = rt_arr_idx % 5000;
-
-	update_wheel_arr();
-	update_rpm_arr();
 
 	return 0;
 }

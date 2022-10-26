@@ -9,7 +9,6 @@
 #define INC_CAR_UTILS_H_
 
 
-#include "global_vars.h"
 #include <stdbool.h>
 
 typedef enum
@@ -61,6 +60,8 @@ typedef enum
 
 } solenoid_position_t;
 
+// TODO these are not correct anymore
+
 void update_car_shift_struct();
 
 void clutch_task();
@@ -73,7 +74,7 @@ void set_upshift_solenoid(solenoid_position_t position);
 
 void set_downshift_solenoid(solenoid_position_t position);
 
-void set_all_solenoids(solenoid_position_t position);
+void set_shift_solenoids(solenoid_position_t position);
 
 void throttle_blip(bool state);
 
@@ -121,9 +122,7 @@ bool calc_validate_upshift();
 bool calc_validate_downshift();
 
 
-extern gear_t car_gear;
 extern shift_struct_t car_shift_data;
-
 
 
 

@@ -7,7 +7,7 @@ extern TIM_HandleTypeDef htim8;
 #define HIGH_REAR_ANGLE 3700
 #define LOW_REAR_ANGLE 2550 // high downforce or low downforce position?
 
-int angle = 2750;
+int angle = HIGH_REAR_ANGLE;
 
 void acm_init(void)
 {
@@ -25,6 +25,7 @@ void run_acm(void)
 	else
 	{
 		TIM8->CCR3 = HIGH_REAR_ANGLE;
+		//TIM8->CCR3 = angle;
 	}
 }
 
