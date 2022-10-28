@@ -14,8 +14,13 @@ extern TIM_HandleTypeDef htim2;
 
 shift_struct_t car_shift_data = {.current_gear = ERROR_GEAR};
 
-// TODO actually look at data for these and use some nice defines
-float gear_ratios[5] = {141.7f, 112.9f, 97.1f, 86.6f, 78.7f};
+float gear_ratios[5] = {
+		GEAR_1_WHEEL_RATIO,
+		GEAR_2_WHEEL_RATIO,
+		GEAR_3_WHEEL_RATIO,
+		GEAR_4_WHEEL_RATIO,
+		GEAR_5_WHEEL_RATIO
+};
 
 // averaging RPM, wheel speed, and trans speed
 float rpm_arr[RPM_ARRAY_SIZE];
@@ -59,7 +64,9 @@ void clutch_task(buttons_t* button_states, Main_States_t car_state, bool anti_st
 		return;
 	}
 
-	// If neither clutch button pressed and we are in IDLE and not in anti stall close clutch solenoid
+	// If neither clutch button pressed and we are in IDLE and not in anti stall
+	// close clutch solenoid. This will cause clutch presses to latch to the end
+	// of a shift
 	if (!(button_states->clutch_fast_button || button_states->clutch_slow_button)
 			&& car_state == ST_IDLE && !anti_stall_active)
 	{
@@ -105,7 +112,8 @@ void check_buttons_and_set_clutch_sol(solenoid_position_t position, buttons_t* b
 
 // check_and_spark_cut
 //  set the spark cut state as inputed. Do not allow spark cutting when we are
-//  entering or exiting neutral, or if the current RPM is already too low
+//  entering or exiting neutral, or if the current RPM is already too low.
+//  NOTE: if we loose RPM from CAN we lose spark cut in this config
 void check_and_spark_cut(bool state)
 {
 	// dont allow spark cut while entering or exiting neutral or if we are already
@@ -344,13 +352,14 @@ bool calc_validate_upshift(gear_t current_gear, buttons_t* buttons)
 	case GEAR_3:
 	case GEAR_4:
 		car_shift_data.target_gear = current_gear + 1;
-		car_shift_data.target_RPM = calc_target_RPM();
+		car_shift_data.target_RPM = calc_target_RPM(car_shift_data.target_gear);
 		// always allow shifts for now
 		//return validate_target_RPM();
 		return true;
 
 	case GEAR_5:
 	case ERROR_GEAR:
+	default:
 		car_shift_data.target_gear = ERROR_GEAR;
 		car_shift_data.target_RPM = 0;
 		return true;
@@ -370,7 +379,7 @@ bool calc_validate_downshift(gear_t current_gear, buttons_t* buttons)
 	case GEAR_4:
 	case GEAR_5:
 		car_shift_data.target_gear = current_gear - 1;
-		car_shift_data.target_RPM = calc_target_RPM();
+		car_shift_data.target_RPM = calc_target_RPM(car_shift_data.target_gear);
 		// for now always allow downshifts, even if the target RPM is too high
 		//return validate_target_RPM();
 		return true;

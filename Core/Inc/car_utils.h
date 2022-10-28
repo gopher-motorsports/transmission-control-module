@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include "main_task.h"
+#include "buttons.h"
 
 typedef enum
 {

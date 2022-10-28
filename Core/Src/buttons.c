@@ -6,6 +6,8 @@
  */
 
 #include "buttons.h"
+#include "main.h"
+#include "shift_parameters.h"
 
 buttons_t car_buttons;
 
@@ -17,15 +19,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 	switch (GPIO_PIN)
 	{
 	case CLUTCH_SLOW_DROP_Pin:
-		car_buttons.clutch_slow_button = 			!HAL_GPIO_ReadPin(CLUTCH_SLOW_BTN_GPIO_Port, CLUTCH_SLOW_BTN_Pin);
+		car_buttons.clutch_slow_button = !HAL_GPIO_ReadPin(CLUTCH_SLOW_BTN_GPIO_Port, CLUTCH_SLOW_BTN_Pin);
 		break;
 
 	case CLUTCH_FAST_BTN_Pin:
-			car_buttons.clutch_fast_button = 		HAL_GPIO_ReadPin(CLUTCH_FAST_BTN_GPIO_Port, CLUTCH_FAST_BTN_Pin);
+			car_buttons.clutch_fast_button = HAL_GPIO_ReadPin(CLUTCH_FAST_BTN_GPIO_Port, CLUTCH_FAST_BTN_Pin);
 			break;
 
 	case UPSHIFT_BTN_Pin:
-		car_buttons.upshift_button = 	!HAL_GPIO_ReadPin(UPSHIFT_BTN_GPIO_Port, UPSHIFT_BTN_Pin);
+		car_buttons.upshift_button = !HAL_GPIO_ReadPin(UPSHIFT_BTN_GPIO_Port, UPSHIFT_BTN_Pin);
 		// Set flag on edge with debounce
 		if (HAL_GetTick() - last_upshift > BUTTON_DEBOUNCE_MS && car_buttons.upshift_button)
 		{
@@ -35,7 +37,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 		break;
 
 	case DOWNSHIFT_BTN_Pin:
-		car_buttons.downshift_button = 	!HAL_GPIO_ReadPin(DOWNSHIFT_BTN_GPIO_Port, DOWNSHIFT_BTN_Pin);
+		car_buttons.downshift_button = !HAL_GPIO_ReadPin(DOWNSHIFT_BTN_GPIO_Port, DOWNSHIFT_BTN_Pin);
 		// Set flag on edge with debounce
 		if (HAL_GetTick() - last_downshift > BUTTON_DEBOUNCE_MS && car_buttons.downshift_button)
 		{

@@ -8,6 +8,7 @@
 #ifndef INC_MAIN_TASK_H_
 #define INC_MAIN_TASK_H_
 
+#include <stdint.h>
 
 typedef enum
 {
@@ -21,7 +22,7 @@ typedef enum
 	ST_U_BEGIN_SHIFT,
 	ST_U_LOAD_SHIFT_LVR,
 	ST_U_EXIT_GEAR,
-	//ST_U_SPARK_RETURN,
+	ST_U_SPARK_RETURN,
 	ST_U_ENTER_GEAR,
 	ST_U_FINISH_SHIFT,
 } Upshift_States_t;
@@ -67,10 +68,8 @@ typedef struct
 } logs_t;
 
 
-int init_main_task();
-int main_task();
-void run_upshift_sm();
-void run_downshift_sm();
+int init_main_task(void);
+int main_task(void);
 
 #define HEARTBEAT_LED_TIME_ms 500
 #define DISPLAY_UPDATE_TIME_ms 100
