@@ -29,7 +29,7 @@
 #define DOWNSHIFT_EXIT_TIMEOUT_MS 30 // short time to exit. Data shows we can exit pretty easily
 #define DOWNSHIFT_ENTER_TIMEOUT_MS 75
 #define DOWNSHIFT_FAIL_EXTRA_CLUTCH_HOLD 50 // some extra time is given in addition because the clutch takes some time to return to the bite point
-#define DOWNSHIFT_EXTRA_PUSH_TIME 50 // TODO add this
+#define DOWNSHIFT_EXTRA_PUSH_TIME 50
 #define DOWNSHIFT_EXIT_POS_MM 34.0f
 #define DOWNSHIFT_ENTER_POS_MM 28.2f
 

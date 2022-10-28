@@ -12,14 +12,14 @@
 
 typedef enum
 {
-	ST_IDLE,
+	ST_IDLE = 0,
 	ST_HDL_UPSHIFT,
 	ST_HDL_DOWNSHIFT
 } Main_States_t;
 
 typedef enum
 {
-	ST_U_BEGIN_SHIFT,
+	ST_U_BEGIN_SHIFT = 0,
 	ST_U_LOAD_SHIFT_LVR,
 	ST_U_EXIT_GEAR,
 	ST_U_SPARK_RETURN,
@@ -29,7 +29,7 @@ typedef enum
 
 typedef enum
 {
-	ST_D_BEGIN_SHIFT,
+	ST_D_BEGIN_SHIFT = 0,
 	ST_D_LOAD_SHIFT_LVR,
 	ST_D_EXIT_GEAR,
 	ST_D_ENTER_GEAR,
@@ -75,5 +75,6 @@ int main_task(void);
 #define DISPLAY_UPDATE_TIME_ms 100
 #define GEAR_UPDATE_TIME_ms 25
 
+#define MIN_LAP_TIME_ms 2000
 
 #endif /* INC_MAIN_TASK_H_ */

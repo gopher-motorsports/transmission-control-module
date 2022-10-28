@@ -56,10 +56,49 @@ int main_task(void)
 	update_and_queue_param_u8(&tcm_using_clutch, car_shift_data.using_clutch);
 	update_and_queue_param_u8(&tcm_anti_stall, car_shift_data.anti_stall);
 
-	// check for the lap timer signal
-	// TODO add some logic for this that holds it high for ~500ms to prevent bouncing
-	// in the data
-	update_and_queue_param_u8(&tcm_lap_timer, !HAL_GPIO_ReadPin(LAP_TIM_9_GPIO_Port, LAP_TIM_9_Pin));
+	// logic for sending the current state of the shifts
+	switch (car_Main_State)
+	{
+	default:
+	case ST_IDLE:
+		// not shifting, send 0
+		update_and_queue_param_u8(&tcm_shift_state, 0);
+		break;
+
+	case ST_HDL_UPSHIFT:
+		// send the upshift state
+		update_and_queue_param_u8(&tcm_shift_state, car_Upshift_State);
+		break;
+
+	case ST_HDL_DOWNSHIFT:
+		// send the downshift state
+		update_and_queue_param_u8(&tcm_shift_state, car_Downshift_State);
+		break;
+	}
+
+	// check for the lap timer signal. Use logic to make sure a clean signal
+	// is held to make it easier to send to the display
+	static uint32_t last_lap_beacon = 0;
+	if (HAL_GetTick() - last_lap_beacon <= MIN_LAP_TIME_ms)
+	{
+		// keep the lap beacon at high to make a clean signal
+		update_and_queue_param_u8(&tcm_lap_timer, 1);
+	}
+	else
+	{
+		// there has not been a new lap within the buffer zone
+		if (!HAL_GPIO_ReadPin(LAP_TIM_9_GPIO_Port, LAP_TIM_9_Pin))
+		{
+			// a new lap has been detected
+			update_and_queue_param_u8(&tcm_lap_timer, 1);
+			last_lap_beacon = HAL_GetTick();
+		}
+		else
+		{
+			// no new lap, keep sending low
+			update_and_queue_param_u8(&tcm_lap_timer, 0);
+		}
+	}
 
 	// acm go brrrrr
 	run_acm();
@@ -103,7 +142,7 @@ int main_task(void)
 		set_downshift_solenoid(SOLENOID_OFF);
 		set_spark_cut(false);
 
-		// TODO potentially use the opposite solenoid to push the shift lever
+		// NOTE: potentially use the opposite solenoid to push the shift lever
 		// back into a neutral position quicker. This would use more air but
 		// would allow us to shift again much sooner. We would need to make
 		// sure the shift position is valid before doing this to prevent
