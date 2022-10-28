@@ -19,13 +19,14 @@ int send_display_data()
 	CAN_TxHeaderTypeDef tx_header;
 	uint32_t tx_mailbox_num;
 
-	// TODO - figure out how to handle clutch display. What happens in the case of sensor failure?
 	// Clutch Data
 	display_data_1[7] = clutch_open();
 	// DRS(Aux1) status
 	display_data_1[3] = (uint8_t)car_buttons.aero_rear_button;
 	// What gear are we currently in
 	display_data_1[1] = car_shift_data.current_gear;
+
+	// TODO send the lap timer signal
 
 	// tx_header for display_data_1
 	tx_header.IDE = CAN_ID_STD;

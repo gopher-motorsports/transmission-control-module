@@ -110,11 +110,11 @@ void check_buttons_and_set_clutch_sol(solenoid_position_t position, buttons_t* b
 	set_clutch_solenoid(position);
 }
 
-// check_and_spark_cut
+// safe_spark_cut
 //  set the spark cut state as inputed. Do not allow spark cutting when we are
 //  entering or exiting neutral, or if the current RPM is already too low.
 //  NOTE: if we loose RPM from CAN we lose spark cut in this config
-void check_and_spark_cut(bool state)
+void safe_spark_cut(bool state)
 {
 	// dont allow spark cut while entering or exiting neutral or if we are already
 	// below the minimum allowable RPM
@@ -136,17 +136,17 @@ void reach_target_RPM_spark_cut(uint32_t target_rpm)
 	// if the target RPM is too low, do not spark cut
 	if (target_rpm < MIN_SPARK_CUT_RPM)
 	{
-		check_and_spark_cut(false);
+		safe_spark_cut(false);
 	}
 
 	// if the current RPM is higher than the target RPM, spark cut to reach it
 	else if (car_shift_data.current_RPM > target_rpm)
 	{
-		check_and_spark_cut(true);
+		safe_spark_cut(true);
 	}
 	else
 	{
-		check_and_spark_cut(false);
+		safe_spark_cut(false);
 	}
 }
 

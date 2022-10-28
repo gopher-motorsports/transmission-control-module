@@ -39,18 +39,12 @@ typedef struct shift_struct
 	bool currently_moving;
 	// Gear established - Used for determining gear upon startup
 	bool gear_established;
-	// Are we currently throttle blipping?
-	bool throttle_blip;
 	// Are we using the clutch for this shift?
 	bool using_clutch;
-	// Did we fail to enter target gear?
-	bool failed_enter_gear;
 	// Has the shift been successful
 	bool successful_shift;
 	// Anti Stall
 	bool anti_stall;
-	// Using clutch override
-	bool clutch_override;
 } shift_struct_t;
 
 
@@ -66,7 +60,7 @@ extern shift_struct_t car_shift_data;
 void update_car_shift_struct(void);
 void clutch_task(buttons_t* button_states, Main_States_t car_state, bool anti_stall_active);
 void check_buttons_and_set_clutch_sol(solenoid_position_t position, buttons_t* button_states);
-void check_and_spark_cut(bool state);
+void safe_spark_cut(bool state);
 void reach_target_RPM_spark_cut(uint32_t target_rpm);
 bool anti_stall(buttons_t* button_states, gear_t current_gear);
 gear_t get_current_gear(Main_States_t current_state);

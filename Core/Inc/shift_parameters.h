@@ -24,14 +24,14 @@
 #define UPSHIFT_ENTER_POS_MM 47.3f
 
 // downshift defines
-#define DOWNSHIFT_MIN_TIME 70
-#define DOWNSHIFT_SHIFT_LEVER_PRELOAD_TIME_MS 50
-#define DOWNSHIFT_EXIT_TIMEOUT_MS 75
-#define DOWNSHIFT_ENTER_TIMEOUT_MS 100
-#define FAILED_ENTER_CLUTCH_CLOSE_TIMEOUT_MS 200
+#define DOWNSHIFT_MIN_SHIFT_TIME 60 // some extra time is given in addition to this because the clutch takes some time to return to the bite point, even with fast clutch
+#define DOWNSHIFT_SHIFT_LEVER_PRELOAD_TIME_MS 20 // preloads seem to be less important for downshifts as exiting gear is almost always successful
+#define DOWNSHIFT_EXIT_TIMEOUT_MS 30 // short time to exit. Data shows we can exit pretty easily
+#define DOWNSHIFT_ENTER_TIMEOUT_MS 75
+#define DOWNSHIFT_FAIL_EXTRA_CLUTCH_HOLD 50 // some extra time is given in addition because the clutch takes some time to return to the bite point
 #define DOWNSHIFT_EXTRA_PUSH_TIME 50 // TODO add this
 #define DOWNSHIFT_EXIT_POS_MM 34.0f
-#define DOWNSHIFT_ENTER_POS_MM 31.0f
+#define DOWNSHIFT_ENTER_POS_MM 28.2f
 
 // clutch defines
 #define CLUTCH_OPEN_POS_MM 27.0f
