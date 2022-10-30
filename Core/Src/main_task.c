@@ -19,6 +19,8 @@ extern CAN_HandleTypeDef hcan1;
 static Main_States_t car_Main_State = ST_IDLE;
 static Upshift_States_t car_Upshift_State;
 static Downshift_States_t car_Downshift_State;
+static uint32_t last_lap_time = 0;
+static uint32_t fastest_lap_time = 0;
 
 int init_main_task(void)
 {
@@ -91,7 +93,12 @@ int main_task(void)
 		{
 			// a new lap has been detected
 			update_and_queue_param_u8(&tcm_lap_timer, 1);
+			last_lap_time = HAL_GetTick() - last_lap_beacon;
+			if(fastest_lap_time != 0 && last_lap_time < fastest_lap_time) {
+				fastest_lap_time = last_lap_time;
+			}
 			last_lap_beacon = HAL_GetTick();
+			send_lap_time_data(last_lap_time, fastest_lap_time);
 		}
 		else
 		{
