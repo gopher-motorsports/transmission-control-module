@@ -13,7 +13,7 @@
 
 extern CAN_HandleTypeDef hcan2;
 
-int send_display_data()
+int send_display_data(int32_t last_fastest_delta_time)
 {
 	uint8_t display_data_1[8] = {0};
 
@@ -21,11 +21,16 @@ int send_display_data()
 	uint32_t tx_mailbox_num;
 
 	// Clutch Data
-	display_data_1[7] = clutch_open();
+	display_data_1[2] = clutch_open();
 	// DRS(Aux1) status
-	display_data_1[3] = tcm_lap_timer.data;
+	display_data_1[1] = tcm_lap_timer.data;
 	// What gear are we currently in
-	display_data_1[1] = car_shift_data.current_gear;
+	display_data_1[0] = car_shift_data.current_gear;
+
+	display_data_1[3] = (last_fastest_delta_time&0x000000FF);
+	display_data_1[4] = (last_fastest_delta_time&0x0000FF00) >> 8;
+	display_data_1[5] = (last_fastest_delta_time&0x00FF0000) >> 16;
+	display_data_1[6] = (last_fastest_delta_time&0xFF000000) >> 24;
 
 	// tx_header for display_data_1
 	tx_header.IDE = CAN_ID_STD;

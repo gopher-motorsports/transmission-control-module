@@ -21,6 +21,7 @@ static Upshift_States_t car_Upshift_State;
 static Downshift_States_t car_Downshift_State;
 static uint32_t last_lap_time = 0;
 static uint32_t fastest_lap_time = (uint32_t)(-1);
+static int last_fastest_delta_time = 0;
 
 int init_main_task(void)
 {
@@ -94,6 +95,7 @@ int main_task(void)
 			// a new lap has been detected
 			update_and_queue_param_u8(&tcm_lap_timer, 1);
 			last_lap_time = HAL_GetTick() - last_lap_beacon;
+			last_fastest_delta_time = last_lap_time - fastest_lap_time;
 			if(fastest_lap_time != 0 && last_lap_time < fastest_lap_time) {
 				fastest_lap_time = last_lap_time;
 			}
@@ -134,7 +136,7 @@ int main_task(void)
 	if (HAL_GetTick() - last_display_update >= DISPLAY_UPDATE_TIME_ms)
 	{
 		last_display_update = HAL_GetTick();
-		send_display_data();
+		send_display_data(last_fastest_delta_time);
 	}
 
 	// handle the clutch based on the state of the car and the buttons
