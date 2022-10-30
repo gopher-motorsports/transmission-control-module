@@ -147,8 +147,6 @@ int main_task(void)
 	case ST_IDLE:
 		// in idle state, make sure we are not spark cutting and not pushing
 		// the solenoid
-		set_upshift_solenoid(SOLENOID_OFF);
-		set_downshift_solenoid(SOLENOID_OFF);
 		set_spark_cut(false);
 
 		// NOTE: potentially use the opposite solenoid to push the shift lever
@@ -157,6 +155,27 @@ int main_task(void)
 		// sure the shift position is valid before doing this to prevent
 		// always pushing the shift lever into a shifting position during
 		// idle state
+
+		// TODO WARNING this will mean shifting will not work if the shift
+		// pot gets disconnected as the lever will push one way
+		if (get_shift_pot_pos() > LEVER_NEUTRAL_POS_MM + LEVER_NEUTRAL_TOLERANCE)
+		{
+			// shifter pos is too high. Bring it back down
+			set_upshift_solenoid(SOLENOID_OFF);
+			set_downshift_solenoid(SOLENOID_ON);
+		}
+		else if (get_shift_pot_pos() < LEVER_NEUTRAL_POS_MM - LEVER_NEUTRAL_TOLERANCE)
+		{
+			// shifter pos is too low. Bring it up
+			set_upshift_solenoid(SOLENOID_ON);
+			set_downshift_solenoid(SOLENOID_OFF);
+		}
+		else
+		{
+			// we good. Levers off
+			set_upshift_solenoid(SOLENOID_OFF);
+			set_downshift_solenoid(SOLENOID_OFF);
+		}
 
 		// start a downshift if there is one pending. This means that a new
 		// shift can be queued during the last shift
@@ -288,7 +307,7 @@ static void run_upshift_sm(void)
 		// the spark is cut. In order to leave the gear we must return spark
 		// briefly
 		set_upshift_solenoid(SOLENOID_ON);
-		safe_spark_cut(false);
+		safe_spark_cut(true);
 
 		// the shifter has moved above the threshold of exiting the gear. Spark
 		// must be cut again to reach the correct RPM for the next gear. If

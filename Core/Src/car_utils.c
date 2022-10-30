@@ -177,6 +177,8 @@ bool anti_stall(buttons_t* button_states, gear_t current_gear)
 float rw_ratio_avg;
 float theoretical_rpm_arr[5];
 
+float temp1, temp2;
+
 // get_current_gear
 //  returns the current gear the car is in. This is done first by checking the neutral
 //  sensor, then by using the rear wheel speed to find the correct ratio from the
@@ -185,7 +187,7 @@ float theoretical_rpm_arr[5];
 //  If the gear is not established then the gear ratios must be closer to the gear
 gear_t get_current_gear(Main_States_t current_state)
 {
-	float minimum_rpm_difference = 9999999.9f;
+	float minimum_rpm_difference = 15000.0f;
 	float temp_diff;
 	float ave_wheel_speed;
 	float ave_rpm;
@@ -222,8 +224,8 @@ gear_t get_current_gear(Main_States_t current_state)
 	{
 		// if the gear is established, use a much longer set of samples and take the
 		// closest gear
-		ave_rpm = get_ave_rpm(GEAR_ESTABLISHED_NUM_SAMPLES_ms);
-		ave_wheel_speed = get_ave_wheel_speed(GEAR_ESTABLISHED_NUM_SAMPLES_ms);
+		temp1 = ave_rpm = get_ave_rpm(GEAR_ESTABLISHED_NUM_SAMPLES_ms);
+		temp2 = ave_wheel_speed = get_ave_wheel_speed(GEAR_ESTABLISHED_NUM_SAMPLES_ms);
 		for (uint8_t c = 0; c < NUM_OF_GEARS; c++)
 		{
 			theoredical_rpm = ave_wheel_speed * gear_ratios[c];
@@ -258,7 +260,7 @@ gear_t get_current_gear(Main_States_t current_state)
 		// we have found the minimum difference. If it is within tolerance then
 		// return the gear and establish. Otherwise return error gear and do not
 		// establish
-		if (temp_diff / ave_rpm <= GEAR_ESTABLISH_TOLERANCE_percent)
+		if (minimum_rpm_difference / ave_rpm <= GEAR_ESTABLISH_TOLERANCE_percent)
 		{
 			car_shift_data.gear_established = true;
 			return (gear_t)(best_gear + 1);
