@@ -14,10 +14,10 @@
 #define TARGET_RPM_TOLERANCE 0.03f
 
 // upshift defines
-#define UPSHIFT_MIN_TIME 70 // for an upshift this does not include the preload time. This is used if the shift position sensor is wrong and the state machine goes through each state too quickly. If it is wrong in the other direction the timeouts for each state will be used
-#define UPSHIFT_SHIFT_LEVER_PRELOAD_TIME_MS 70 // long preload to get lots of load on the shift lever
+#define UPSHIFT_MIN_TIME 85 // for an upshift this does not include the preload time. This is used if the shift position sensor is wrong and the state machine goes through each state too quickly. If it is wrong in the other direction the timeouts for each state will be used
+#define UPSHIFT_SHIFT_LEVER_PRELOAD_TIME_MS 40 // long preload to get lots of load on the shift lever
 #define UPSHIFT_EXIT_TIMEOUT_MS 25 // short time to exit. If the shift lever wasn't pushed far enough quickly it is probably stuck
-#define UPSHIFT_EXIT_SPARK_RETURN_MS 20 // we dont want the spark return to be too long
+#define UPSHIFT_EXIT_SPARK_RETURN_MS 10 // we dont want the spark return to be too long
 #define UPSHIFT_ENTER_TIMEOUT_MS 30 // data shows this does not take very long, so have a pretty short timeout here.
 #define UPSHIFT_EXTRA_PUSH_TIME 50
 #define UPSHIFT_EXIT_POS_MM 42.8f
