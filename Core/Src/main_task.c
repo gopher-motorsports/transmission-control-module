@@ -20,7 +20,7 @@ static Main_States_t car_Main_State = ST_IDLE;
 static Upshift_States_t car_Upshift_State;
 static Downshift_States_t car_Downshift_State;
 static uint32_t last_lap_time = 0;
-static uint32_t fastest_lap_time = 0;
+static uint32_t fastest_lap_time = (uint32_t)(-1);
 
 int init_main_task(void)
 {

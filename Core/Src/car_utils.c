@@ -23,8 +23,8 @@ float gear_ratios[5] = {
 };
 
 // averaging RPM, wheel speed, and trans speed
-float rpm_arr[RPM_ARRAY_SIZE];
-float wheel_arr[WHEEL_SPEED_ARRAY_SIZE];
+float rpm_arr[RPM_ARRAY_SIZE] = {0};
+float wheel_arr[WHEEL_SPEED_ARRAY_SIZE] = {0};
 uint32_t trans_speed_arr[TRANS_ARR_SIZE] = {0};
 uint32_t rpm_idx = 0;
 uint32_t wheel_idx = 0;
@@ -407,6 +407,10 @@ float get_ave_wheel_speed(uint32_t ms_of_samples)
 	{
 		ms_of_samples = WHEEL_SPEED_ARRAY_SIZE;
 	}
+	if (ms_of_samples == 0)
+	{
+		ms_of_samples = 1;
+	}
 
 	// find the first point to average from. Rollover is possible
 	starting_index = wheel_idx - ms_of_samples;
@@ -438,6 +442,10 @@ float get_ave_rpm(uint32_t ms_of_samples)
 	if (ms_of_samples > RPM_ARRAY_SIZE)
 	{
 		ms_of_samples = RPM_ARRAY_SIZE;
+	}
+	if (ms_of_samples == 0)
+	{
+		ms_of_samples = 1;
 	}
 
 	// find the first point to average from. Rollover is possible
