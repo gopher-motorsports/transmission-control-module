@@ -9,7 +9,6 @@
 #define INC_BUTTONS_H_
 
 #include <stdint.h>
-#include "global_vars.h"
 
 typedef struct buttons
 {

@@ -8,49 +8,65 @@
 #ifndef INC_SHIFT_PARAMETERS_H_
 #define INC_SHIFT_PARAMETERS_H_
 
-#define TIME_BASED_SHIFTING_ONLY 0
-
-#define SHIFT_LEVER_PRELOAD_TIME_MS 50
-
+// shifting defines for both upshift and downshift
 #define LEVER_NEUTRAL_POS_MM 37.0f
-
 #define LEVER_NEUTRAL_TOLERANCE 0.8
+#define TARGET_RPM_TOLERANCE 0.03f
 
-
-#define UPSHIFT_MIN_TIME 70
-
-#define UPSHIFT_EXIT_TIMEOUT_MS 75
-
-#define UPSHIFT_ENTER_TIMEOUT_MS 100
-
+// upshift defines
+#define UPSHIFT_MIN_TIME 85 // for an upshift this does not include the preload time. This is used if the shift position sensor is wrong and the state machine goes through each state too quickly. If it is wrong in the other direction the timeouts for each state will be used
+#define UPSHIFT_SHIFT_LEVER_PRELOAD_TIME_MS 40 // long preload to get lots of load on the shift lever
+#define UPSHIFT_EXIT_TIMEOUT_MS 25 // short time to exit. If the shift lever wasn't pushed far enough quickly it is probably stuck
+#define UPSHIFT_EXIT_SPARK_RETURN_MS 10 // we dont want the spark return to be too long
+#define UPSHIFT_ENTER_TIMEOUT_MS 30 // data shows this does not take very long, so have a pretty short timeout here.
+#define UPSHIFT_EXTRA_PUSH_TIME 50
+#define UPSHIFT_RETURN_HOME_TIME 20
 #define UPSHIFT_EXIT_POS_MM 42.8f
+#define UPSHIFT_ENTER_POS_MM 47.3f
 
-#define UPSHIFT_ENTER_POS_MM 43.5f
-
-
-#define DOWNSHIFT_MIN_TIME 70
-
-#define DOWNSHIFT_EXIT_TIMEOUT_MS 75
-
-#define DOWNSHIFT_ENTER_TIMEOUT_MS 100
-
+// downshift defines
+#define DOWNSHIFT_MIN_SHIFT_TIME 60 // some extra time is given in addition to this because the clutch takes some time to return to the bite point, even with fast clutch
+#define DOWNSHIFT_SHIFT_LEVER_PRELOAD_TIME_MS 20 // preloads seem to be less important for downshifts as exiting gear is almost always successful
+#define DOWNSHIFT_EXIT_TIMEOUT_MS 30 // short time to exit. Data shows we can exit pretty easily
+#define DOWNSHIFT_ENTER_TIMEOUT_MS 75
+#define DOWNSHIFT_FAIL_EXTRA_CLUTCH_HOLD 50 // some extra time is given in addition because the clutch takes some time to return to the bite point
+#define DOWNSHIFT_EXTRA_PUSH_TIME 50
+#define DOWNSHIFT_RETURN_HOME_TIME 40
 #define DOWNSHIFT_EXIT_POS_MM 34.0f
+#define DOWNSHIFT_ENTER_POS_MM 28.2f
 
-#define DOWNSHIFT_ENTER_POS_MM 31.0f
-
-
-#define TARGET_RPM_TOLERANCE 0.1f
-
+// clutch defines
 #define CLUTCH_OPEN_POS_MM 27.0f
-
 #define CLUTCH_SLOW_DROP_FAST_TO_SLOW_EXTRA_MM 3.0f
-
 #define CLUTCH_OPEN_TIMEOUT_MS 300
 
-#define SPARK_RETURN_MS 10
+// transmission, wheel speed, and RPM array defines
+#define RPM_ARRAY_SIZE 250
+#define WHEEL_SPEED_ARRAY_SIZE RPM_ARRAY_SIZE
+#define TRANS_ARR_SIZE 100
+#define TRANS_TO_ENGINE_RATIO 7.5f
+#define WHEEL_TO_TRANS_RATIO 20.0f
 
-#define FAILED_ENTER_CLUTCH_CLOSE_TIMEOUT_MS 500
+// gear establishing and calculating defines
+#define DEFAULT_WHEEL_SPEED_AVE_TIME_ms 25
+#define GEAR_NOT_ESTABLISHED_NUM_SAMPLES_ms 50
+#define GEAR_ESTABLISHED_NUM_SAMPLES_ms RPM_ARRAY_SIZE
+#define GEAR_ESTABLISH_TOLERANCE_percent 0.03f
+#define NUM_OF_GEARS 5
+#define GEAR_1_WHEEL_RATIO 141.7f
+#define GEAR_2_WHEEL_RATIO 112.9f
+#define GEAR_3_WHEEL_RATIO 97.1f
+#define GEAR_4_WHEEL_RATIO 86.6f
+#define GEAR_5_WHEEL_RATIO 78.7f
 
+// RPM cutoffs
+#define MAX_RPM 14000
+#define MIN_SPARK_CUT_RPM 3000
+#define ANTI_STALL_RPM 1700
+#define MAX_CRANK_RPM 700
 
+// misc defines
+#define MOVING_WHEEL_SPEED_MIN_CUTOFF 2.0f
+#define BUTTON_DEBOUNCE_MS 20
 
 #endif /* INC_SHIFT_PARAMETERS_H_ */
