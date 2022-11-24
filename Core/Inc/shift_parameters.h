@@ -20,6 +20,7 @@
 #define UPSHIFT_EXIT_SPARK_RETURN_MS 10 // we dont want the spark return to be too long
 #define UPSHIFT_ENTER_TIMEOUT_MS 30 // data shows this does not take very long, so have a pretty short timeout here.
 #define UPSHIFT_EXTRA_PUSH_TIME 50
+#define UPSHIFT_RETURN_HOME_TIME 20
 #define UPSHIFT_EXIT_POS_MM 42.8f
 #define UPSHIFT_ENTER_POS_MM 47.3f
 
@@ -30,6 +31,7 @@
 #define DOWNSHIFT_ENTER_TIMEOUT_MS 75
 #define DOWNSHIFT_FAIL_EXTRA_CLUTCH_HOLD 50 // some extra time is given in addition because the clutch takes some time to return to the bite point
 #define DOWNSHIFT_EXTRA_PUSH_TIME 50
+#define DOWNSHIFT_RETURN_HOME_TIME 40
 #define DOWNSHIFT_EXIT_POS_MM 34.0f
 #define DOWNSHIFT_ENTER_POS_MM 28.2f
 

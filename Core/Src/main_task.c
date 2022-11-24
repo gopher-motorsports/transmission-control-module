@@ -146,34 +146,8 @@ int main_task(void)
 		// in idle state, make sure we are not spark cutting and not pushing
 		// the solenoid
 		set_spark_cut(false);
-
-		// NOTE: potentially use the opposite solenoid to push the shift lever
-		// back into a neutral position quicker. This would use more air but
-		// would allow us to shift again much sooner. We would need to make
-		// sure the shift position is valid before doing this to prevent
-		// always pushing the shift lever into a shifting position during
-		// idle state
-
-		// TODO WARNING this will mean shifting will not work if the shift
-		// pot gets disconnected as the lever will push one way
-		if (get_shift_pot_pos() > LEVER_NEUTRAL_POS_MM + LEVER_NEUTRAL_TOLERANCE)
-		{
-			// shifter pos is too high. Bring it back down
-			set_upshift_solenoid(SOLENOID_OFF);
-			set_downshift_solenoid(SOLENOID_ON);
-		}
-		else if (get_shift_pot_pos() < LEVER_NEUTRAL_POS_MM - LEVER_NEUTRAL_TOLERANCE)
-		{
-			// shifter pos is too low. Bring it up
-			set_upshift_solenoid(SOLENOID_ON);
-			set_downshift_solenoid(SOLENOID_OFF);
-		}
-		else
-		{
-			// we good. Levers off
-			set_upshift_solenoid(SOLENOID_OFF);
-			set_downshift_solenoid(SOLENOID_OFF);
-		}
+		set_upshift_solenoid(SOLENOID_OFF);
+		set_downshift_solenoid(SOLENOID_OFF);
 
 		// start a downshift if there is one pending. This means that a new
 		// shift can be queued during the last shift
@@ -221,6 +195,7 @@ static void run_upshift_sm(void)
 	static uint32_t begin_exit_gear_spark_return_tick;
 	static uint32_t finish_shift_start_tick;
 	static uint32_t spark_cut_start_time;
+	static uint32_t return_home_start_time;
 
 	// calculate the target RPM at the start of each cycle through the loop
 	car_shift_data.target_RPM = calc_target_RPM(car_shift_data.target_gear);
@@ -388,13 +363,32 @@ static void run_upshift_sm(void)
 				car_shift_data.gear_established = false;
 			}
 
-			// check if we can disable the solenoid and return to to idle
+			// Done shifting. Return the shift lever back to a neutral position
 			if (HAL_GetTick() - finish_shift_start_tick >= UPSHIFT_EXTRA_PUSH_TIME)
 			{
-				// done with the upshift state machine
+				car_Upshift_State = ST_U_RETURN_HOME;
 				set_upshift_solenoid(SOLENOID_OFF);
-				car_Main_State = ST_IDLE;
+				set_downshift_solenoid(SOLENOID_ON);
+				return_home_start_time = HAL_GetTick();
 			}
+		}
+		break;
+
+	case ST_U_RETURN_HOME:
+		// this will push the solenoid in the opposite direction to move the
+		// shift lever back to the neutral position. It would be better not
+		// to have this but sometimes the lever gets stuck and does not ratchet
+		// back without extra help
+		set_downshift_solenoid(SOLENOID_ON);
+
+		// if the shift lever returns to the home state or there is a timeout,
+		// exit the shift state machine
+		if (get_shift_pot_pos() < LEVER_NEUTRAL_POS_MM + LEVER_NEUTRAL_TOLERANCE ||
+				HAL_GetTick() - return_home_start_time >= UPSHIFT_RETURN_HOME_TIME)
+		{
+			// done with the upshift state machine
+			set_downshift_solenoid(SOLENOID_OFF);
+			car_Main_State = ST_IDLE;
 		}
 		break;
 	}
@@ -409,6 +403,7 @@ static void run_downshift_sm(void)
 	static uint32_t begin_enter_gear_tick;
 	static uint32_t begin_hold_clutch_tick;
 	static uint32_t finish_shift_start_tick;
+	static uint32_t return_home_start_time;
 
 	// calculate the target rpm at the start of each cycle
 	car_shift_data.target_RPM = calc_target_RPM(car_shift_data.target_gear);
@@ -578,13 +573,33 @@ static void run_downshift_sm(void)
 				car_shift_data.gear_established = false;
 			}
 
-			// check if we can disable the solenoid and return to to idle
+			// check if we can disable the solenoid and return the shift lever
 			if (HAL_GetTick() - finish_shift_start_tick >= DOWNSHIFT_EXTRA_PUSH_TIME)
 			{
-				// done with the downshift state machine
-				set_upshift_solenoid(SOLENOID_OFF);
-				car_Main_State = ST_IDLE;
+				// Done shifting. Return the shift lever back to a neutral position
+				car_Upshift_State = ST_D_RETURN_HOME;
+				set_downshift_solenoid(SOLENOID_OFF);
+				set_upshift_solenoid(SOLENOID_ON);
+				return_home_start_time = HAL_GetTick();
 			}
+		}
+		break;
+
+	case ST_D_RETURN_HOME:
+		// this will push the solenoid in the opposite direction to move the
+		// shift lever back to the neutral position. It would be better not
+		// to have this but sometimes the lever gets stuck and does not ratchet
+		// back without extra help
+		set_upshift_solenoid(SOLENOID_ON);
+
+		// if the shift lever returns to the home state or there is a timeout,
+		// exit the shift state machine
+		if (get_shift_pot_pos() > LEVER_NEUTRAL_POS_MM - LEVER_NEUTRAL_TOLERANCE ||
+				HAL_GetTick() - return_home_start_time >= DOWNSHIFT_RETURN_HOME_TIME)
+		{
+			// done with the downshift state machine
+			set_upshift_solenoid(SOLENOID_OFF);
+			car_Main_State = ST_IDLE;
 		}
 		break;
 	}

@@ -25,6 +25,7 @@ typedef enum
 	ST_U_SPARK_RETURN,
 	ST_U_ENTER_GEAR,
 	ST_U_FINISH_SHIFT,
+	ST_U_RETURN_HOME,
 } Upshift_States_t;
 
 typedef enum
@@ -34,7 +35,8 @@ typedef enum
 	ST_D_EXIT_GEAR,
 	ST_D_ENTER_GEAR,
 	ST_D_HOLD_CLUTCH,
-	ST_D_FINISH_SHIFT
+	ST_D_FINISH_SHIFT,
+	ST_D_RETURN_HOME,
 } Downshift_States_t;
 
 typedef struct
